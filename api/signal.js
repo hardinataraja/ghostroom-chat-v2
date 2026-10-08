@@ -9,6 +9,12 @@ module.exports = (req, res) => {
   const q = req.method === 'GET' ? req.query : (typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {});
   const code = String(q.room || '').toUpperCase(), peer = String(q.peer || '').slice(0, 40);
   if (!/^[A-HJ-NP-Z2-9]{6,12}$/.test(code) || !/^[\w-]{4,40}$/.test(peer)) return res.status(400).json({ error: 'bad request' });
+  if (q.action === 'ice') { // TURN relay config. Set TURN_URL/TURN_USER/TURN_PASS in Vercel env to use your own; otherwise public best-effort relay.
+    const e = process.env, ice = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
+    if (e.TURN_URL) ice.push({ urls: e.TURN_URL.split(','), username: e.TURN_USER, credential: e.TURN_PASS });
+    else ice.push({ urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turns:openrelay.metered.ca:443?transport=tcp'], username: 'openrelayproject', credential: 'openrelayproject' });
+    return res.json({ iceServers: ice });
+  }
   if (q.action === 'create') {
     if (!rooms.has(code)) rooms.set(code, { t: now, ttl: [1e4, 6e4, 3e5, 36e5, 864e5].includes(+q.ttl) ? +q.ttl : 3e5, peers: {} });
     return res.json({ ok: true });
