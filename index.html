@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505"><title>GhostRoom</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="style.css"></head>
+<body><div class="crt"></div>
+<main id="landing" class="screen on"><pre class="logo" aria-label="GHOSTROOM">
+ ██████╗ ██╗  ██╗ ██████╗ ███████╗████████╗
+██╔════╝ ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝
+██║  ███╗███████║██║   ██║███████╗   ██║
+██║   ██║██╔══██║██║   ██║╚════██║   ██║
+╚██████╔╝██║  ██║╚██████╔╝███████║   ██║
+ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝  ROOM</pre>
+<p class="dim">&gt; EPHEMERAL P2P COMMUNICATION<br>&gt; NO ACCOUNT<br>&gt; NO CHAT DATABASE<br>&gt; TEMPORARY ROOMS<span class="cur">_</span></p>
+<div class="btns"><button data-go="create">[ CREATE ROOM ]</button><button data-go="join">[ JOIN ROOM ]</button><button data-go="privacy" class="alt">[ PRIVACY ]</button></div></main>
+
+<main id="create" class="screen"><section class="box"><h2>&gt; CREATE NEW ROOM</h2>
+<label for="cn">CODENAME</label><input id="cn" maxlength="20" placeholder="shadow_user" autocomplete="off">
+<label>MESSAGE LIFETIME</label><div class="row" id="ttls"></div>
+<div class="btns"><button id="gen">[ GENERATE ROOM ]</button><button data-go="landing" class="alt">[ BACK ]</button></div>
+<div id="made" hidden><h2>&gt; ROOM CREATED</h2><p>ROOM CODE<br><b id="mcode" class="big"></b></p><p>ROOM LINK<br><span id="mlink" class="dim"></span></p>
+<div class="row"><button id="cc">[ COPY CODE ]</button><button id="cl">[ COPY LINK ]</button><button id="wa">[ SHARE WHATSAPP ]</button><button id="qr">[ QR ]</button><button id="enter">[ ENTER ROOM ]</button></div><div id="qrbox"></div></div>
+<p class="msg" id="cmsg"></p></section></main>
+
+<main id="join" class="screen"><section class="box"><h2>&gt; JOIN ROOM</h2>
+<label for="jc">ROOM CODE</label><input id="jc" maxlength="12" placeholder="X7K9P2" autocomplete="off" autocapitalize="characters">
+<label for="jn">CODENAME</label><input id="jn" maxlength="20" placeholder="shadow_user" autocomplete="off">
+<div class="btns"><button id="connect">[ CONNECT ]</button><button data-go="landing" class="alt">[ BACK ]</button></div><p class="msg" id="jmsg"></p></section></main>
+
+<main id="chat" class="screen"><header><button id="leave" aria-label="Leave room">←</button><b id="rc"></b><span id="status">● WAITING</span></header>
+<div class="info" id="info"></div><div id="log" aria-live="polite"></div><div id="typing" class="dim"></div>
+<div class="bar"><button id="shareb" aria-label="Share">[QR]</button><button id="snd" aria-label="Sound">[SND:OFF]</button><textarea id="in" rows="1" maxlength="2000" placeholder="> type message..." aria-label="Message"></textarea><button id="send" aria-label="Send">[➤]</button></div>
+<div id="qrchat"></div></main>
+
+<main id="privacy" class="screen"><section class="box"><h2>&gt; PRIVACY</h2><ul>
+<li>No account, email or phone number is required.</li><li>Chat is designed to be peer-to-peer (WebRTC DataChannel, DTLS-encrypted by the browser).</li>
+<li>Messages are not stored in any app database. The server only relays connection setup (signaling).</li>
+<li>Network metadata such as IP addresses can be visible to peers, STUN servers and network infrastructure.</li>
+<li>Messages expire locally, but any peer can copy or screenshot them.</li><li>This is NOT a guarantee of absolute anonymity.</li></ul>
+<div class="btns"><button data-go="landing">[ BACK ]</button></div></section></main>
+
+<main id="error" class="screen"><section class="box"><h2 id="et" class="danger"></h2><p id="eb"></p><div class="btns"><button id="retry">[ RETRY ]</button><button id="eback">[ BACK ]</button></div></section></main>
+<script src="app.js"></script><script src="v2.js"></script></body></html>

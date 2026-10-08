@@ -1,0 +1,22 @@
+:root{--bg:#050505;--t:#0A0F0A;--g:#00FF66;--g2:#00CC55;--c:#00E5FF;--w:#FFB000;--d:#FF3B30;--tx:#D7FFE5}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:14px/1.5 "JetBrains Mono","IBM Plex Mono","Fira Code",ui-monospace,monospace}
+.crt{pointer-events:none;position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);z-index:9}
+.screen{display:none;height:100dvh;padding:16px;overflow:auto;max-width:720px;margin:auto}.screen.on{display:block}
+#chat.on{display:flex;flex-direction:column;padding:0}
+.logo{color:var(--g);text-shadow:0 0 6px rgba(0,255,102,.5);font-size:clamp(6px,1.9vw,12px);line-height:1.1;overflow:hidden}
+.dim{color:var(--g2)}.danger{color:var(--d)}.big{font-size:28px;color:var(--g);letter-spacing:4px;text-shadow:0 0 6px rgba(0,255,102,.5)}
+.cur{animation:b 1s steps(2) infinite}@keyframes b{50%{opacity:0}}
+.box{border:1px solid var(--g2);background:var(--t);padding:16px;margin-top:8px}h2{margin:0 0 12px;color:var(--g);font-size:16px}
+label{display:block;margin:12px 0 4px;color:var(--c);font-size:12px}
+input,textarea{width:100%;background:#000;border:1px solid var(--g2);color:var(--tx);font:inherit;padding:10px;border-radius:0}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--c)}
+button{background:transparent;border:1px solid var(--g);color:var(--g);font:inherit;padding:10px 12px;cursor:pointer;min-height:44px}
+button:hover,button.sel{background:var(--g);color:#000}button.alt{border-color:var(--g2);color:var(--g2)}
+.btns,.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.row{margin-top:4px}.msg{color:var(--w);min-height:1.5em}
+header{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--g2);background:var(--t)}header b{flex:1;color:var(--g);letter-spacing:2px}
+.info{font-size:11px;color:var(--g2);padding:4px 12px;border-bottom:1px solid #123}
+#log{flex:1;overflow:auto;padding:12px}.m{margin:0 0 10px;word-break:break-word;white-space:pre-wrap}.m.me{text-align:right;color:var(--c)}
+.m small{display:block;color:var(--g2)}.sys{color:var(--w)}#typing{padding:0 12px;min-height:20px;font-size:12px}
+.bar{display:flex;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--g2);background:var(--t)}
+.bar textarea{resize:none;max-height:96px}#qrchat,#qrbox{background:#fff;display:inline-block;padding:6px;margin-top:8px}#qrchat:empty,#qrbox:empty{display:none}
+li{margin:6px 0}
