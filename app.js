@@ -2,7 +2,7 @@
 // NOTE: full mesh WebRTC: every user connects to every other user. Load grows ~N^2; best for 2-5 users (MAX 10 enforced by server).
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789', TTLS = [['10s', 1e4], ['1m', 6e4], ['5m', 3e5], ['1h', 36e5], ['24h', 864e5]];
-const ICE = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
+let ICE = [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun.cloudflare.com:3478' }];
 const S = { room: '', me: '', id: '', ttl: 3e5, peers: {}, msgs: [], poll: null, on: false, snd: false, rate: [], last: 0, retry: null };
 let ttlSel = 3e5, audio;
 const ls = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
@@ -94,6 +94,7 @@ async function enter(room, name, create) {
   show('chat'); $('#rc').textContent = room; $('#log').textContent = ''; $('#qrchat').textContent = '';
   const boot = ['initializing ghostroom...', 'establishing signaling channel...', 'waiting for peer...']; S.msgs = []; boot.forEach(t => S.msgs.push({ sys: true, text: '> ' + t })); render();
   try {
+    try { ICE = (await api('ice', {}, true)).iceServers || ICE; } catch {}
     if (create) await api('create', { ttl: S.ttl });
     const j = await api('join'); S.ttl = j.ttl; S.on = true;
     S.msgs = ls.get('ghostroom_messages', []).filter(m => m.room === room); cleanupExpiredMessages();

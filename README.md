@@ -26,3 +26,6 @@ Terminal commands (/help /clear /users /info /timer /burn /poll /invite /qr /pin
 - Room destruction/ownership is not authenticated: a peer claiming to be owner can end the room for others. Polls are not tamper-proof.
 - Polls/secret drop use simple browser prompts. No boot animation. Re-rendering the chat can interrupt audio playback when new messages arrive.
 - Files are base64-chunked JSON over the DataChannel (simple, ~33% overhead).
+
+## TURN (fixes 'Connection to a peer failed')
+Peers on different carriers/NATs need a TURN relay. `/api/signal?action=ice` returns STUN + a TURN server. By default it uses the public best-effort Open Relay (third-party, may be rate-limited; it only relays DTLS-encrypted traffic but sees IPs). For reliability, set Vercel env vars `TURN_URL` (comma-separated, e.g. `turn:host:3478,turns:host:443?transport=tcp`), `TURN_USER`, `TURN_PASS` (e.g. from a free Metered/Cloudflare TURN account).
