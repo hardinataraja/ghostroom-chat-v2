@@ -45,11 +45,13 @@ function stat() {
 }
 
 // ---- WebRTC ----
+// Non-trickle ICE: wait until candidates are gathered so offer/answer carry them (avoids out-of-order signaling races).
+const gathered = pc => new Promise(r => { if (pc.iceGatheringState === 'complete') return r(); const t = setTimeout(r, 5000); pc.addEventListener('icegatheringstatechange', () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); r(); } }); });
 const sig = (to, type, data) => api('send', { to, type, data }).catch(() => {});
 function mk(pid, init) {
   if (S.peers[pid]) return S.peers[pid];
   const pc = new RTCPeerConnection({ iceServers: ICE }), p = S.peers[pid] = { id: pid, pc, name: pid.slice(0, 6), dc: null };
-  pc.onicecandidate = e => e.candidate && sig(pid, 'ice', e.candidate);
+  pc.onicecandidate = e => { if (e.candidate) (p.ct ||= new Set()).add(e.candidate.type); };
   pc.onconnectionstatechange = () => { if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) drop(pid, pc.connectionState === 'failed'); stat(); };
   const wire = dc => {
     p.dc = dc; dc.onopen = () => { dc.send(JSON.stringify({ t: 'hi', n: S.me, e: S.endsAt, o: S.owner ? 1 : 0 })); stat(); };
@@ -71,11 +73,11 @@ function mk(pid, init) {
 }
 function drop(pid, failed) {
   const p = S.peers[pid]; if (!p) return; delete S.peers[pid]; try { p.pc.close(); } catch {}
-  if (p.hi) sys(`${p.name} disconnected.`); else if (failed) sys('Connection to a peer failed (NAT/firewall? no TURN server is provided).'); stat();
+  if (p.hi) sys(`${p.name} disconnected.`); else if (failed) sys('Connection to a peer failed. Local candidates: ' + [...(p.ct || [])].join(',') + ' (no "relay" = TURN unreachable or credentials rejected).'); stat();
 }
 async function onSignal(m) {
   try {
-    if (m.type === 'offer') { const p = mk(m.from, false); await p.pc.setRemoteDescription(m.data); const a = await p.pc.createAnswer(); await p.pc.setLocalDescription(a); sig(m.from, 'answer', a); }
+    if (m.type === 'offer') { const p = mk(m.from, false); await p.pc.setRemoteDescription(m.data); const a = await p.pc.createAnswer(); await p.pc.setLocalDescription(a); await gathered(p.pc); sig(m.from, 'answer', p.pc.localDescription); }
     else if (m.type === 'answer' && S.peers[m.from]) await S.peers[m.from].pc.setRemoteDescription(m.data);
     else if (m.type === 'ice' && S.peers[m.from]) await S.peers[m.from].pc.addIceCandidate(m.data);
   } catch {}
@@ -86,7 +88,7 @@ async function loop() {
   catch (e) { if (e.status === 410 || e.status === 404) { return reconnect(); } if (++S.fails > 5) { $('#status').textContent = '● RECONNECTING'; } }
   S.poll = setTimeout(loop, 1000);
 }
-async function reconnect() { try { await api('create', { ttl: S.ttl }); const j = await api('join'); for (const id of j.peers) if (!S.peers[id]) { const p = mk(id, true); const o = await p.pc.createOffer(); await p.pc.setLocalDescription(o); sig(id, 'offer', o); } S.poll = setTimeout(loop, 1000); } catch { S.poll = setTimeout(reconnect, 3000); } }
+async function reconnect() { try { await api('create', { ttl: S.ttl }); const j = await api('join'); for (const id of j.peers) if (!S.peers[id]) { const p = mk(id, true); const o = await p.pc.createOffer(); await p.pc.setLocalDescription(o); await gathered(p.pc); sig(id, 'offer', p.pc.localDescription); } S.poll = setTimeout(loop, 1000); } catch { S.poll = setTimeout(reconnect, 3000); } }
 
 async function enter(room, name, create) {
   if (!supported()) return err('UNSUPPORTED BROWSER', 'Please use an updated Chrome, Firefox, Edge or Safari.');
@@ -99,7 +101,7 @@ async function enter(room, name, create) {
     const j = await api('join'); S.ttl = j.ttl; S.on = true;
     S.msgs = ls.get('ghostroom_messages', []).filter(m => m.room === room); cleanupExpiredMessages();
     sys('You joined the room.');
-    for (const id of j.peers) { const p = mk(id, true); const o = await p.pc.createOffer(); await p.pc.setLocalDescription(o); sig(id, 'offer', o); }
+    for (const id of j.peers) { const p = mk(id, true); const o = await p.pc.createOffer(); await p.pc.setLocalDescription(o); await gathered(p.pc); sig(id, 'offer', p.pc.localDescription); }
     ls.set('ghostroom_active_room', room); loop(); stat();
   } catch (e) {
     if (e.status === 404) err('ROOM NOT FOUND', 'The room may have expired or the room code is invalid.');
